@@ -39,6 +39,6 @@ To start using this project follow this step-by-step guide:
 
 5. **Testing the App**:
    
-   You can test the app by opening a web browser and navigating to `http://localhost:3000`. You should see your React app running. 
+   You can test the app by opening a web browser and navigating to `http://localhost:3000`. You should see the React app running. 
 
 That's it! 
