@@ -5,7 +5,7 @@
   background-color: #f4f2ea;
 }
 
-.Tabs{
+.Bills{
   color: white;
 }
 
@@ -15,10 +15,6 @@
 
 .MuiTabs-indicator {
   background-color: #c8b166 !important;
-}
-
-.MuiTab-root {
-  color: #ffffff !important; 
 }
 
 
@@ -43,7 +39,10 @@
   background-color: #444444;
   align-items: center;
   padding-top: 1%;
-  
+}
+
+.Modal{
+  color: black;
 }
 
 

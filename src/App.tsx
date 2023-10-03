@@ -38,6 +38,7 @@ function JsonTable() {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [tabValue, setTabValue] = useState<number>(0);
+  const [tabValue2, setTabValue2] = useState<number>(0);
   const [selectedStatus, setSelectedStatus] = useState<string>(''); // State for selected status filter
   
   useEffect(() => {
@@ -123,6 +124,17 @@ const getFavoriteBills = () => {
   return data.filter((item) => isFavorite(item.bill.shortTitleEn));
 };
 
+const handleDialogTabChange = (event:React.SyntheticEvent<Element, Event>, newValue:number) => {
+  setTabValue2(newValue);
+};
+
+<DialogTitle>Titles
+  <Tabs value={tabValue} onChange={handleDialogTabChange}>
+    <Tab label="English" />
+    <Tab label="Gaelic" />
+  </Tabs>
+</DialogTitle>
+
   return (
     <div className='Background'>
         <div className="header">
@@ -136,11 +148,10 @@ const getFavoriteBills = () => {
             onChange={(event, newValue) => setTabValue(newValue)}
             centered
             indicatorColor="primary"
-            textColor="primary"
-            className='Tabs'
+            className='Bills'
           >
-            <Tab label="All Bills"></Tab>
-            <Tab label="Favorite Bills"></Tab>
+            <Tab label="All Bills" sx={{ '&.MuiTab-root': { color: 'white' } }}></Tab>
+            <Tab label="Favorite Bills" sx={{ '&.MuiTab-root': { color: 'white' } }}></Tab>
           </Tabs>
         </div>
       {tabValue === 0 && (
@@ -202,8 +213,7 @@ const getFavoriteBills = () => {
                     style={{ cursor: 'pointer' }}>
                       {item.bill.status}</TableCell>
                     {/* <TableCell>{item.bill.shortTitleEn}</TableCell> */}
-                    <TableCell 
-                    key={index}
+                    <TableCell key={index}
                     onClick={() => handleRowClick(item.bill.shortTitleEn, item.bill.shortTitleGa)}
                     style={{ cursor: 'pointer' }}>
                       {item.bill.sponsors.length > 0 ? (
@@ -295,14 +305,27 @@ const getFavoriteBills = () => {
         </div>
       )}
       <Dialog open={openModal} onClose={handleCloseModal}>
-        <DialogTitle>Titles</DialogTitle>
+        <DialogTitle> Title
+          <Tabs 
+          value={tabValue2} 
+          onChange={(event, newValue) => setTabValue2(newValue)}
+          centered
+        >
+            <Tab label="English" sx={{ '&.MuiTab-root': { color: 'black' } }} ></Tab>
+            <Tab label="Gaelic" sx={{ '&.MuiTab-root': { color: 'black' } }}></Tab>
+          </Tabs>
+          </DialogTitle>
         <DialogContent>
-          <Typography variant="subtitle1">
-            English Title: {selectedRow && selectedRow.shortTitleEn}
-          </Typography>
-          <Typography variant="subtitle1">
-            Gaelic Title: {selectedRow && selectedRow.shortTitleGa}
-          </Typography>
+          {tabValue2 === 0 && (
+            <Typography variant="subtitle1">
+              English Title: {selectedRow && selectedRow.shortTitleEn}
+            </Typography>
+          )}
+          {tabValue2 === 1 && (
+            <Typography variant="subtitle1">
+              Gaelic Title: {selectedRow && selectedRow.shortTitleGa}
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseModal}>Close</Button>
