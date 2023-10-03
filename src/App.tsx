@@ -187,6 +187,7 @@ const handleDialogTabChange = (event:React.SyntheticEvent<Element, Event>, newVa
                        <MenuItem value="Defeated">Defeated</MenuItem>
                        <MenuItem value="Withdrawn">Withdrawn</MenuItem>
                        <MenuItem value="Enacted">Enacted</MenuItem>
+                       <MenuItem value="Rejected">Rejected</MenuItem>
                     </Select>
                   </TableCell>
                  
