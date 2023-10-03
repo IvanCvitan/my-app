@@ -29,16 +29,16 @@ To start using this project follow this step-by-step guide:
 
 4. **Start the Development Server**:
    
-   To run your React app locally and see the changes in real-time, you can start the development server. In your project directory, run:
+   To run React app locally and see the changes in real-time, you can start the development server. In your project directory, run:
    
    ```bash
    npm start
    ```
    
-   This will start the development server, and your app will be available at `http://localhost:3000` in your web browser. As you make changes to your code, the development server will automatically reload the app.
+   This will start the development server, and the app will be available at `http://localhost:3000` in your web browser. As you make changes to your code, the development server will automatically reload the app.
 
 5. **Testing the App**:
    
-   You can test the app by opening a web browser and navigating to `http://localhost:3000`. You should see your React app running. Any changes you make in your code will be reflected in the browser immediately.
+   You can test the app by opening a web browser and navigating to `http://localhost:3000`. You should see your React app running. 
 
 That's it! 
