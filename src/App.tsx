@@ -7,7 +7,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Button,
   TextField,
   Dialog,
   DialogTitle,
@@ -16,26 +15,38 @@ import {
   Typography,
   Tab,
   Tabs,
+  Pagination,
+  Button,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import IconButton from '@mui/material/IconButton';
-
-import * as legInterface from './interfaces'
+import * as legInterface from './interfaces';
+import './App.css';
+import Logo from './logo.svg';
 
 function JsonTable() {
   const [data, setData] = useState<legInterface.Result[]>([]);
   const [billCount, setBillCount] = useState<number>();
-  const [limit, setLimit] = useState<number>(50); // Initial limit
+  const [page, setPage] = useState<number>(0); // Current page
+  const itemsPerPage = 40;
   const [filterText, setFilterText] = useState<string>('');
-  const [selectedRow, setSelectedRow] = useState<{ shortTitleEn: string; shortTitleGa: string } | null>(null); // Track the selected row
+  const [selectedRow, setSelectedRow] = useState<{ shortTitleEn: string; shortTitleGa: string } | null>(
+    null
+  );
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [tabValue, setTabValue] = useState<number>(0); // 0 for All Bills, 1 for Favorite Bills
-
+  const [tabValue, setTabValue] = useState<number>(0);
+  const [selectedStatus, setSelectedStatus] = useState<string>(''); // State for selected status filter
+  
   useEffect(() => {
-    // Function to fetch data based on the current limit and filter text
+    // Function to fetch data based on the current page, items per page, filter text, and status filter
     const fetchData = () => {
-      fetch(`/v1/legislation?limit=${limit}&bill_no=${filterText}`, {
+      // Construct the API URL with the selected status filter
+      const apiUrl = `/v1/legislation?limit=${itemsPerPage}&skip=${page * itemsPerPage}&bill_no=${filterText}&status=${selectedStatus}`;
+
+      fetch(apiUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -52,20 +63,19 @@ function JsonTable() {
           setData(resultsArray);
           const bc = jsonData.head.counts.billCount;
           setBillCount(bc);
-
         })
         .catch((error) => {
           console.error('Error fetching data:', error);
         });
     };
 
-    // Fetch data when the component mounts, the limit changes, or the filter text changes
+    // Fetch data when the component mounts, the page number changes, or the filter text or status filter changes
     fetchData();
-  }, [limit, filterText]);
+  }, [page, filterText, selectedStatus]);
 
-  // Function to load the next 50 items
-  const loadMore = () => {
-    setLimit(limit + 50);
+  // Function to handle page change
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
   };
 
   // Function to handle row click and open the modal
@@ -98,23 +108,41 @@ function JsonTable() {
   // Function to check if a bill is favorite
   const isFavorite = (shortTitleEn: string) => favorites.includes(shortTitleEn);
 
-  // Function to filter favorite bills
-  const getFavoriteBills = () => {
-    return data.filter((item) => isFavorite(item.bill.shortTitleEn));
+  // Function to filter bills based on status
+  const filterBillsByStatus = (bills: legInterface.Result[]) => {
+    if (!selectedStatus) {
+      // If no status filter is selected, return all bills
+      return bills;
+    }
+    // Filter bills based on the selected status
+    return bills.filter((bill) => bill.bill.status === selectedStatus);
   };
 
+  // Function to get favorite bills
+const getFavoriteBills = () => {
+  return data.filter((item) => isFavorite(item.bill.shortTitleEn));
+};
+
   return (
-    <div>
-      <Tabs
-        value={tabValue}
-        onChange={(event, newValue) => setTabValue(newValue)}
-        centered
-        indicatorColor="primary"
-        textColor="primary"
-      >
-        <Tab label="All Bills"></Tab>
-        <Tab label="Favorite Bills"></Tab>
-      </Tabs>
+    <div className='Background'>
+        <div className="header">
+          <div className="logo-container">
+          <a href="https://www.oireachtas.ie" target="_blank" rel="noopener noreferrer">
+            <img src={Logo} alt="Logo"/>
+          </a>
+          </div>
+          <Tabs
+            value={tabValue}
+            onChange={(event, newValue) => setTabValue(newValue)}
+            centered
+            indicatorColor="primary"
+            textColor="primary"
+            className='Tabs'
+          >
+            <Tab label="All Bills"></Tab>
+            <Tab label="Favorite Bills"></Tab>
+          </Tabs>
+        </div>
       {tabValue === 0 && (
         <div>
           <TextField
@@ -122,34 +150,68 @@ function JsonTable() {
             variant="outlined"
             value={filterText}
             onChange={(e) => setFilterText(e.target.value)}
-            style={{ marginBottom: '10px' }}
+            style={{ marginLeft: '15%', marginTop: '7px', marginBottom: '7px', width:'15%' }}
           />
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} className='table'>
             <Table>
               <TableHead>
                 <TableRow>
                   <TableCell>Bill number</TableCell>
                   <TableCell>Bill Type</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Title</TableCell>
+                  <TableCell>Status  
+                    <Select
+                       variant="outlined"
+                       value={selectedStatus}
+                       onChange={(e) => setSelectedStatus(e.target.value as string)}
+                       renderValue={() => ""}
+                       sx={{
+                        "& .css-1d3z3hw-MuiOutlinedInput-notchedOutline": {
+                            borderColor: "transparent"
+                        }
+                      }} 
+                    >   
+                       <MenuItem value="">All Status</MenuItem>
+                       <MenuItem value="Current">Current</MenuItem>
+                       <MenuItem value="Lapsed">Lapsed</MenuItem>
+                       <MenuItem value="Defeated">Defeated</MenuItem>
+                       <MenuItem value="Withdrawn">Withdrawn</MenuItem>
+                       <MenuItem value="Enacted">Enacted</MenuItem>
+                    </Select>
+                  </TableCell>
+                 
+                  {/* <TableCell>Title</TableCell> */}
                   <TableCell>Sponsor</TableCell>
                   <TableCell>Favorite</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {
-                  
-                data.map((item, index) => (
-                  <TableRow
+                {filterBillsByStatus(data).map((item , index) =>  (
+                  <TableRow>
+                    <TableCell 
                     key={index}
                     onClick={() => handleRowClick(item.bill.shortTitleEn, item.bill.shortTitleGa)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <TableCell>{item.bill.billNo}</TableCell>
-                    <TableCell>{item.bill.billType}</TableCell>
-                    <TableCell>{item.bill.status}</TableCell>
-                    <TableCell>{item.bill.shortTitleEn}</TableCell>
-                    <TableCell>{item.bill.sponsors[0].sponsor.as.showAs}</TableCell>
+                    style={{ cursor: 'pointer' }}>
+                      {item.bill.billNo}</TableCell>
+                    <TableCell 
+                    key={index}
+                    onClick={() => handleRowClick(item.bill.shortTitleEn, item.bill.shortTitleGa)}
+                    style={{ cursor: 'pointer' }}>
+                      {item.bill.billType}</TableCell>
+                    <TableCell key={index}
+                    onClick={() => handleRowClick(item.bill.shortTitleEn, item.bill.shortTitleGa)}
+                    style={{ cursor: 'pointer' }}>
+                      {item.bill.status}</TableCell>
+                    {/* <TableCell>{item.bill.shortTitleEn}</TableCell> */}
+                    <TableCell 
+                    key={index}
+                    onClick={() => handleRowClick(item.bill.shortTitleEn, item.bill.shortTitleGa)}
+                    style={{ cursor: 'pointer' }}>
+                      {item.bill.sponsors.length > 0 ? (
+                        item.bill.sponsors[0].sponsor.as.showAs
+                      ) : (
+                        "No Sponsor Available"
+                      )}
+                    </TableCell>
                     <TableCell>
                       <IconButton
                         color={isFavorite(item.bill.shortTitleEn) ? 'primary' : 'default'}
@@ -163,39 +225,60 @@ function JsonTable() {
               </TableBody>
             </Table>
           </TableContainer>
-          <Tabs style={{ marginTop: '10px' }} centered>
-            <Button variant="contained" color="primary" onClick={loadMore}>
-              Load More
-            </Button>
-          </Tabs>
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '15px' }}>
+            {billCount && (
+              <Pagination
+                count={Math.ceil(billCount / itemsPerPage)}
+                page={page + 1}
+                onChange={(event, newPage) => handlePageChange(newPage - 1)}
+              />
+            )}
+          </div>
         </div>
       )}
       {tabValue === 1 && (
         <div>
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} className='table'>
             <Table>
               <TableHead>
                 <TableRow>
                   <TableCell>Bill number</TableCell>
                   <TableCell>Bill Type</TableCell>
                   <TableCell>Status</TableCell>
-                  <TableCell>Title</TableCell>
+                  {/* <TableCell>Title</TableCell> */}
                   <TableCell>Sponsor</TableCell>
                   <TableCell>Favorite</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {getFavoriteBills().map((item, index) => (
-                  <TableRow
+                  <TableRow>
+                    <TableCell 
                     key={index}
                     onClick={() => handleRowClick(item.bill.shortTitleEn, item.bill.shortTitleGa)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <TableCell>{item.bill.billNo}</TableCell>
-                    <TableCell>{item.bill.billType}</TableCell>
-                    <TableCell>{item.bill.status}</TableCell>
-                    <TableCell>{item.bill.shortTitleEn}</TableCell>
-                    <TableCell>{item.bill.sponsors[0].sponsor.as.showAs}</TableCell>
+                    style={{ cursor: 'pointer' }}>
+                      {item.bill.billNo}</TableCell>
+                    <TableCell 
+                    key={index}
+                    onClick={() => handleRowClick(item.bill.shortTitleEn, item.bill.shortTitleGa)}
+                    style={{ cursor: 'pointer' }}>
+                      {item.bill.billType}</TableCell>
+                    <TableCell 
+                    key={index}
+                    onClick={() => handleRowClick(item.bill.shortTitleEn, item.bill.shortTitleGa)}
+                    style={{ cursor: 'pointer' }}>
+                      {item.bill.status}</TableCell>
+                    {/* <TableCell>{item.bill.shortTitleEn}</TableCell> */}
+                    <TableCell
+                    key={index}
+                    onClick={() => handleRowClick(item.bill.shortTitleEn, item.bill.shortTitleGa)}
+                    style={{ cursor: 'pointer' }}>
+                      {item.bill.sponsors.length > 0 ? (
+                        item.bill.sponsors[0].sponsor.as.showAs
+                      ) : (
+                        "No Sponsor Available"
+                      )}
+                    </TableCell>
                     <TableCell>
                       <IconButton
                         color={isFavorite(item.bill.shortTitleEn) ? 'primary' : 'default'}
