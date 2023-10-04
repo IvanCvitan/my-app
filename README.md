@@ -13,13 +13,21 @@ To start using this project follow this step-by-step guide:
    
    You should see version numbers for both Node.js and npm.
 
-2. **Clone repo from GitHub**
+2. **Install dependencies**:
+   You'll need to install react and Material UI.
+   To do so open your terminal or command prompt and run the following command:
+   
+   ```bash
+   npm install 
+   ```
+
+3. **Clone repo from GitHub**
    
    ```bash
    git clone https://github.com/IvanCvitan/my-app
    ```
 
-3. **Navigate to the Project Directory**:
+4. **Navigate to the Project Directory**:
    
    Change your working directory to the project:
    
@@ -27,7 +35,7 @@ To start using this project follow this step-by-step guide:
    cd my-app
    ```
 
-4. **Start the Development Server**:
+5. **Start the Development Server**:
    
    To run React app locally and see the changes in real-time, you can start the development server. In your project directory, run:
    
@@ -37,7 +45,7 @@ To start using this project follow this step-by-step guide:
    
    This will start the development server, and the app will be available at `http://localhost:3000` in your web browser. As you make changes to your code, the development server will automatically reload the app.
 
-5. **Testing the App**:
+6. **Testing the App**:
    
    You can test the app by opening a web browser and navigating to `http://localhost:3000`. You should see the React app running. 
 
